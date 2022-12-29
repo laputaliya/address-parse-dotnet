@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Demo</title>
+    <script src="jquery-1.11.0.min.js"></script>
+    <style>
+        .addlabel {
+            display: inline-block;
+            margin: 10px;
+            background: #f7c82e;
+            padding: 5px;
+            border-radius: 3px;
+            cursor:pointer
+        }
+        .demoInput{
+            width:500px;
+            height:350px;
+        }
+        .result {
+            display: table-row;
+        }
+
+        label.cell {
+            min-width: 50px;
+            display: table-cell;
+            border:1px solid;
+            padding:2px;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            function parse(content) {
+                var c = { content: content };
+               // $.post("/api/address", JSON.stringify(c));
+                $.ajax({
+                    url: "/api/Address",
+                    method: "POST",
+                    data: JSON.stringify({ content: content }),                  
+                    contentType: "application/json;charset=UTF-8",
+                    success: function (a) {
+                        console.log(a);
+                      
+                        var htmlContent = "";
+                        for (var i in a) {
+                            htmlContent += "<div class='result'><label class='cell'>" + i + "</label><label class='cell'>" + (a[i] || "") + "</label></div>";
+                        }
+                        $("#parserResult").html(htmlContent);
+                    }, error: function (e) {
+                        console.error(e);
+                    }
+               
+                });
+            }
+            $("div.addlabel").click(function (event) {
+               // alert(event.target.innerText);
+                console.log(event.target.innerText);
+                $("#demoInput").val(event.target.innerText);
+                parse(event.target.innerText);
+            });
+            $("#demoInput").on("paste", function (e) {               
+                var clipboardData = e.originalEvent.clipboardData || window.clipboardData;
+                var text = clipboardData && clipboardData.getData && clipboardData.getData("text");
+                if (text) {
+                    parse(text);
+                }
+
+            })
+        });
+    </script>
+</head>
+<body>
+
+    <div style="display: inline-block; width: 50%; float: left; font-weight: bold">
+        <div>Ctrl+V粘贴源内容</div>
+        <textarea class="demoInput" id="demoInput"></textarea>
+    </div>
+    <div style="display: inline-block; width: 50%; float: left">
+        <div style="font-weight: bold">解析结果</div>
+        <div id="parserResult">
+        <div class="result"><label class="cell">province</label><label class="cell">省份</label></div>
+        <div class="result"><label class="cell">provinceId</label><label class="cell">省份ID</label></div>
+        <div class="result"><label class="cell">city</label><label class="cell">市</label></div>
+        <div class="result"><label class="cell">cityId</label><label class="cell">市ID</label></div>
+        <div class="result"><label class="cell">region</label><label class="cell">区</label></div>
+        <div class="result"><label class="cell">regionId</label><label class="cell">区ID</label></div>
+        <div class="result"><label class="cell">fullAddress</label><label class="cell">完整地址</label></div>
+        <div class="result"><label class="cell">shortAddress</label><label class="cell">简短地址</label></div>
+        <div class="result"><label class="cell">name</label><label class="cell">姓名</label></div>
+        <div class="result"><label class="cell">telphone</label><label class="cell">电话</label></div>
+        <div class="result"><label class="cell">zipcode</label><label class="cell">邮政编码</label></div>
+        <div class="result"><label class="cell">identityNumer</label><label class="cell">身份证号码</label></div></div>
+    </div>
+    <div style="float: left; padding: 5px; width: 100%; display: block; font-weight:bold">
+        点击下面内容，可查看解析结果
+    </div>
+    <div class="demoaddress" style="float:left">
+        <div class="addlabel">贵州省都匀市。甘塘镇绿茵湖村一组2号 刘雪莉 13111111111</div>
+        <div class="addlabel">盐田区山海四季城F栋1B，卢燕13111111111</div>
+        <div class="addlabel">贵州省都匀市。甘塘镇绿茵湖村一组2号 刘雪莉 13111111111</div>
+        <div class="addlabel">深圳市南山区南光路龙坤居2栋D座714，收件人：张珍云，电话：13111111111</div>
+        <div class="addlabel">韩仁伟,13911111111,安徽省安庆市太湖县新仓镇，塔山村，前进组</div>
+        <div class="addlabel">蔡丽凤,13311111111,江苏省盐城市其它区神州路御景湾7#1104</div>
+        <div class="addlabel">北京市 顺义区 胜利街道宜宾南区2-2-401 李俊南 13111111111</div>
+        <div class="addlabel">盐田区山海四季城F栋2f，13111111111 太阳鲜鲜</div>
+        <div class="addlabel">太阳鲜鲜 盐田区山海四季城F栋17A，13111111111</div>
+        <div class="addlabel">广东省清远市 清城区洲心街道，金茂家园一栋一楼100号商铺 13111111111 聂小姐</div>
+        <div class="addlabel">地址：深圳市 南山区 南商路碧海天家园A89B 联系电话：13111111111 黄发猜</div>
+        <div class="addlabel">江苏省 苏州市 吴江区 干将东路678号江苏大厦11楼 215000 徐天宇 13911111111</div>
+        <div class="addlabel">韩仁伟,13911111111,安徽省安庆市太湖县新仓镇，塔山村，前进组</div>
+        <div class="addlabel">南宫雪 重庆市县酉阳土家族苗族自治县龙潭镇龙潭一中新校门13311111111</div>
+        <div class="addlabel">南宫碗 重庆市酉阳土家族苗族自治县龙潭镇龙潭一中新校门13311111111</div>
+        <div class="addlabel">何花菊，86-13311111111，辽宁省 盘锦市 盘山县 东郭镇 辽宁省盘锦市盘山县东郭镇 ，000000</div>
+        <div class="addlabel">
+            所在地区: 湖南省株洲市醴陵市白兔潭镇<br />
+            详细地址: 金牛居委会金牛路5号国超<br />
+            刘娇 131 1111 1111
+        </div>
+        <div class="addlabel">江西南昌市青山湖区广兰大道418号东华理工大学核工系南区9栋1112室 131 1111 1111 孙轶念</div>
+        <div class="addlabel">深圳市盐田区万科东海岸21-102，收件人：叶侠，电话：131 1111 1111</div>
+        <div class="addlabel">
+            地址：广东省佛山市顺德区乐从天佑城E座2005室；<br />
+            联系人：熊翠花<br />
+            联系电话：13111111111；
+        </div>
+        <div class="addlabel">
+            收货人: 杨燕艳<br />
+            手机号码: 13111111111<br />
+            所在地区: 广东省深圳市龙岗区龙岗街道<br />
+            详细地址: 格水村三巷十号三楼
+        </div>
+        <div class="addlabel">张彤，13311111111，黑龙江省 大兴安岭地区 加格达奇区 铁路南小区29号楼4单元5658sf</div>
+        <div class="addlabel">13111111111天津天津市红桥区水木天成1区临湾路9-3-1101</div>
+        <div class="addlabel">王小梅13911111111湖南省郴州市桂东县桂东县清泉镇</div>
+        <div class="addlabel">雁平 86-13311111111 广东省 江门市 恩平市 牛江镇 岭南娟姑水果店</div>
+        <div class="addlabel">湛江市廉江市车板镇人才市场，0755-1331111.曹建林 邮编：713200</div>
+        <div class="addlabel">内蒙古自治区乌兰察布市公安局交警支队车管所</div>
+        <div class="addlabel">长春市朝阳区宵云路36号国航大厦一层</div>
+        <div class="addlabel">成都市崇州市天府软件园B区科技大楼</div>
+        <div class="addlabel">成都市高新区天府软件园B区科技大楼</div>
+        <div class="addlabel">双流区郑通路社保局区52050号</div>
+        <div class="addlabel">岳市岳阳楼区南湖求索路碧灏花园A座1101</div>
+        <div class="addlabel">四川省 凉山州美姑县东方网肖小区18号院</div>
+        <div class="addlabel">重庆攀枝花市东区机场路3中学校</div>
+        <div class="addlabel">渝北区渝北中学51200街道地址</div>
+        <div class="addlabel">13111111111天津天津市红桥区水木天成1区临湾路9-3-1101</div>
+        <div class="addlabel">苏州市昆山市青阳北路时代名苑20号311室</div>
+        <div class="addlabel">崇州市崇阳镇金鸡万人小区兴盛路105-107</div>
+        <div class="addlabel">四平市双辽市辽北街道</div>
+        <div class="addlabel">梧州市奥奇丽路10-9号A幢地层（礼迅贸易有限公司） 卢丽丽</div>
+        <div class="addlabel">江西省抚州市东乡区孝岗镇恒安东路125号1栋3单元502室 13111111111 吴刚</div>
+        <div class="addlabel">清远市清城区石角镇美林湖大东路口佰仹公司 郑万顺 13111111111</div>
+        <div class="addlabel">吉林省长春市朝阳区开运街领秀朝阳小区333弄8号502</div>
+        <div class="addlabel">深圳市龙华区龙华街道1980科技文化产业园3栋317    张三    13800138000 518000 120113196808211234</div>
+    </div>
+</body>
+</html>
