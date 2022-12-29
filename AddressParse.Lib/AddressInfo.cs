@@ -29,14 +29,28 @@
 		/// 区代码
 		/// </summary>
         public int RegionId { get; set; }
-		/// <summary>
-		/// 完整地址
-		/// </summary>
+
+        /// <summary>
+        /// 街道
+        /// </summary>
+        public string Street { get; set; }
+
+        /// <summary>
+        /// 街道ID
+        /// </summary>
+        public int StreetId { get; set; }
+
+        /// <summary>
+        /// 短地址
+        /// </summary>
+        public string ShortAddress { get; set; }
+
+        /// <summary>
+        /// 完整地址
+        /// </summary>
         public string FullAddress { get; set; }
-		/// <summary>
-		/// 短地址
-		/// </summary>
-		public string ShortAddress { get; set; }
+
+
 		/// <summary>
 		/// 姓名
 		/// </summary>

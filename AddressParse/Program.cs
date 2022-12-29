@@ -26,13 +26,14 @@ namespace AddressParse
             app.UseMiddleware(typeof(ErrorHandlingMiddleware), app.Environment);
             app.UseHttpsRedirection();
 
-          //  app.UseAuthorization();
+            //  app.UseAuthorization();
 
             app.UseStaticFiles();
 
             app.MapControllers();
 
             app.Run();
+
         }
     }
 }

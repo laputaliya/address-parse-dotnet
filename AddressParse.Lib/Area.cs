@@ -3,7 +3,7 @@
     /// <summary>
     /// 地址库信息
     /// </summary>
-    internal class Area
+    public class Area
     {
 		/// <summary>
 		/// 地址ID

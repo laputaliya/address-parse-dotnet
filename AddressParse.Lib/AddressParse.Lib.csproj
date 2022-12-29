@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <None Remove="area.json" />
+    <None Remove="area2.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="area.json" />
+    <EmbeddedResource Include="area2.json" />
   </ItemGroup>
 
   <ItemGroup>

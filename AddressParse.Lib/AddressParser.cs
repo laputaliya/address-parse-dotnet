@@ -23,13 +23,18 @@ namespace AddressParse.Lib
         /// 区信息数据源
         /// </summary>
         readonly List<Area> RegionDataSource;
+        /// <summary>
+        /// 区信息数据源
+        /// </summary>
+        readonly List<Area> StreetDataSource;
 
-		public AddressParser()
+        public AddressParser()
         {
-			var d = AreaDataUtil.LoadData();
+			var d = AreaDataUtil.LoadDataWithStreet();
 			ProvinceDataSource = d.Province;
 			CityDataSource = d.City;
 			RegionDataSource = d.Region;
+            StreetDataSource = d.Street;
 
 		}
         /// <summary>
@@ -41,14 +46,48 @@ namespace AddressParse.Lib
         {
 			var addr = StripAddressInfo(data);
 			var ssq = StripAddressDetail(addr.FullAddress);
-			var finalPCR = MatchAddressDetail(ssq.Province, ssq.City, ssq.Region);
+            var finalPCR = MatchAddressDetail(ssq.Province, ssq.City, ssq.Region, ssq.Street);
 			addr.Province = finalPCR.Province;
 			addr.City = finalPCR.City;
 			addr.Region = finalPCR.Region;
-			addr.ShortAddress = ssq.Street;
+			addr.Street = finalPCR.Street;
+            addr.StreetId = finalPCR.StreetId;
 			addr.CityId = finalPCR.CityId;
 			addr.ProvinceId = finalPCR.ProvinceId;
 			addr.RegionId = finalPCR.RegionId;
+            addr.ShortAddress = addr.FullAddress;
+            if (!String.IsNullOrEmpty(addr.Street))
+            {
+                addr.ShortAddress = addr.ShortAddress.Replace(addr.Street,"");
+                if (!string.IsNullOrWhiteSpace(ssq.Street))
+                {
+                    addr.ShortAddress = addr.ShortAddress.Replace(ssq.Street, "");
+                }
+            }
+            if (!String.IsNullOrEmpty(addr.Region))
+            {
+                addr.ShortAddress = addr.ShortAddress.Replace(addr.Region, "");
+                if (!string.IsNullOrWhiteSpace(ssq.Region))
+                {
+                    addr.ShortAddress = addr.ShortAddress.Replace(ssq.Region, "");
+                }
+            }
+            if (!String.IsNullOrEmpty(addr.City))
+            {
+                addr.ShortAddress = addr.ShortAddress.Replace(addr.City, "");
+                if (!string.IsNullOrWhiteSpace(ssq.City))
+                {
+                    addr.ShortAddress = addr.ShortAddress.Replace(ssq.City, "");
+                }
+            }
+            if (!String.IsNullOrEmpty(addr.Province))
+            {
+                addr.ShortAddress = addr.ShortAddress.Replace(addr.Province, "");
+                if (!string.IsNullOrWhiteSpace(ssq.Province))
+                {
+                    addr.ShortAddress = addr.ShortAddress.Replace(ssq.Province, "");
+                }
+            }
             return addr;
         }
 
@@ -152,7 +191,7 @@ namespace AddressParse.Lib
 		/// </summary>
 		/// <param name="a"></param>
 		/// <returns></returns>
-        private (string Province, string City, string Region, string Street) StripAddressDetail(string address)
+        private (string Province, string City, string Region, string Street,string Address) StripAddressDetail(string address)
         {
            // var address = a.FullAddress;
             var addr_origin = address;
@@ -177,7 +216,7 @@ namespace AddressParse.Lib
                 if (address.Contains("旗"))
                 {
                     pos = address.IndexOf("旗");
-                    region = address.Substring(GetPos(pos - 1), 2);
+                    region = address.Substring(GetPos(pos - 1), GetLenth(pos - 1, 2));
                 }
 
 
@@ -193,7 +232,7 @@ namespace AddressParse.Lib
                     }
                     else
                     {
-                        region = address.Substring(GetPos(pos - 2), 3);
+                        region = address.Substring(GetPos(pos - 2), GetLenth(pos - 2, 3));
                     }
 
                 }
@@ -224,14 +263,14 @@ namespace AddressParse.Lib
                         if (address.Contains("自治县"))
                         {
                             var va = new string[] { "省", "市", "州" };
-                            region = address.Substring(GetPos(pos - 6), 7);
+                            region = address.Substring(GetPos(pos - 6), GetLenth(pos - 6, 7));
                             if (va.Contains(region.Substring(0, 1))){
                                 region = region.Substring(1);
                             }
                         }
                         else
                         {
-                            region = address.Substring(GetPos(pos - 2), 3);
+                            region = address.Substring(GetPos(pos - 2), GetLenth(pos - 2, 3));
                         }
                     }
                 }
@@ -242,12 +281,12 @@ namespace AddressParse.Lib
                 var pos = address.IndexOf("市");
                 if (pos == 1)
                 {
-                    region = address.Substring(GetPos(pos - 2), 3);
+                    region = address.Substring(GetPos(pos - 2), GetLenth(pos - 2, 3));
                     street = address.Substring(pos + 1);
 
                 }else if (pos >= 2)
                 {
-                    region = address.Substring(GetPos(pos - 2), 3);
+                    region = address.Substring(GetPos(pos - 2), GetLenth(pos - 2, 3));
                     street = address.Substring(pos + 1);
                 }
             }
@@ -259,19 +298,19 @@ namespace AddressParse.Lib
 
             if (address.Contains("市"))
             {
-                city = address.Substring(GetPos(address.IndexOf("市") - 2), 3);
+                city = address.Substring(GetPos(address.IndexOf("市") - 2), GetLenth(address.IndexOf("市") - 2, 3));
             }
             else if (address.Contains("盟"))
             {
-                city = address.Substring(GetPos(address.IndexOf("盟") - 2), 3);
+                city = address.Substring(GetPos(address.IndexOf("盟") - 2), GetLenth(address.IndexOf("盟") - 2, 3));
             }
             else if (address.Contains("自治州"))
             {
-                city = address.Substring(GetPos(address.IndexOf("自治州") - 4), 3);
+                city = address.Substring(GetPos(address.IndexOf("自治州") - 4), GetLenth(address.IndexOf("自治州") - 4, 3));
             }
             else if (address.Contains("州"))
             {
-                city = address.Substring(GetPos(address.IndexOf("州") - 2), 3);
+                city = address.Substring(GetPos(address.IndexOf("州") - 2), GetLenth(address.IndexOf("州") - 2, 3));
             }
             else
             {
@@ -280,7 +319,7 @@ namespace AddressParse.Lib
 
             if (address.Contains("省") && address.IndexOf("省") < 5)
             {
-				province = address.Substring(0, address.IndexOf("省"));
+                province = address.Substring(0, address.IndexOf("省") + 1);
 			}
 
 
@@ -288,12 +327,40 @@ namespace AddressParse.Lib
             if (street.Contains("市") && city == region)
 			{
 				var pos = street.IndexOf("市");
-				region = street.Substring(GetPos(pos - 2), 3);
+				region = street.Substring(GetPos(pos - 2), GetLenth(address.IndexOf("市") - 2, 3));
 				street = street.Substring(pos + 1);
 			}
 
+            if (street.Contains("街道"))
+            {
+                street = street.Substring(0, street.IndexOf("街道") + 2);
+            }
+            else if (street.Contains("乡"))
+            {
+                street = street.Substring(0, street.IndexOf("乡") + 1);
+            }
+            else if (street.Contains("镇"))
+            {
+                street = street.Substring(0, street.IndexOf("镇") + 1);
+            }
+            if (!string.IsNullOrEmpty(street) && (street.Contains("街道")|| street.Contains("乡")|| street.Contains("镇")) )
+            {
+                address = address.Replace(street, "");
+            }
+            if (!string.IsNullOrEmpty(region))
+            {
+                address = address.Replace(region, "");
+            }
+            if (!string.IsNullOrEmpty(city))
+            {
+                address = address.Replace(city, "");
+            }
+            if (!string.IsNullOrEmpty(province))
+            {
+                address = address.Replace(province, "");
+            }
 
-            return (province, city, region, street);
+            return (province, city, region, street, address);
 
         }
 
@@ -311,25 +378,54 @@ namespace AddressParse.Lib
 			return pos;
         }
 
-		/// <summary>
-		/// 根据地址库匹配最终的省市区信息
-		/// </summary>
-		/// <param name="tempProvince"></param>
-		/// <param name="tempCity"></param>
-		/// <param name="tempRegion"></param>
-		/// <returns></returns>
-        private (string Province, string City, string Region, int ProvinceId, int CityId, int RegionId) MatchAddressDetail(string tempProvince, string tempCity, string tempRegion)
+        /// <summary>
+        /// 获取取值的长度 
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
+        private int GetLenth(int pos, int len)
+        {
+            if (pos < 0)
+            {
+                var templen = len + pos;
+                if (templen < 1)
+                {
+                    return len;
+                }
+                return templen;
+            }
+            return len;
+        }
+
+
+        /// <summary>
+        /// 根据地址库匹配最终的省市区信息
+        /// </summary>
+        /// <param name="tempProvince"></param>
+        /// <param name="tempCity"></param>
+        /// <param name="tempRegion"></param>
+        /// <returns></returns>
+        private (string Province, string City, string Region,string Street, int ProvinceId, int CityId, int RegionId,int StreetId) MatchAddressDetail(string tempProvince, string tempCity, string tempRegion,string tempStreet)
         {
             string province = "";
             string city = "";
             string region = "";
+            string street = "";
             int provinceid = 0;
             int cityid = 0;
 			int regionid = 0;
+            int streetid = 0;
+            List<Area> matchStreetDataSource = new List<Area>();
             List<Area> matchRegionDataSource = new List<Area>();
             List<Area> matchCityDataSource = new List<Area>();
             List<Area> matchProvinceDataSource = new List<Area>();
-			
+
+            if (!string.IsNullOrWhiteSpace(tempStreet))
+            {
+                matchStreetDataSource = StreetDataSource.FindAll(a => a.Name.Contains(tempStreet));
+            }
+
 			if (!string.IsNullOrWhiteSpace(tempRegion))
             {
 				matchRegionDataSource = RegionDataSource.FindAll(a => a.Name.Contains(tempRegion));
@@ -504,7 +600,16 @@ namespace AddressParse.Lib
 
 				}
             }
-            return (province, city, region, provinceid, cityid, regionid);
+            if (matchStreetDataSource.Count > 0)
+            {
+                var streetObj = matchStreetDataSource.Find(a => a.Pid == regionid);
+                if (streetObj != null)
+                {
+                    street = streetObj?.Name;
+                    streetid = streetObj?.Id ?? 0;
+                }
+            }
+            return (province, city, region, street, provinceid, cityid, regionid, streetid);
         }
 
     }
