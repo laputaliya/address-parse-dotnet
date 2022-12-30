@@ -19,14 +19,23 @@ namespace AddressParse.Lib
         /// <returns></returns>
         public static (List<Area> Province, List<Area> City, List<Area> Region, List<Area> Street) LoadDataNoStreet()
         {
-            using var resource = System.Reflection.Assembly.GetAssembly(typeof(AreaDataUtil)).GetManifestResourceStream("AddressParse.Lib.area.json");// System.IO.File.ReadAllText("area.json");
+            var assembly = System.Reflection.Assembly.GetAssembly(typeof(AreaDataUtil));
+            var name = assembly?.GetName().Name;
+            using var resource = assembly?.GetManifestResourceStream($"{name}.area.json");// System.IO.File.ReadAllText("area.json");          
+            List<Area> Province = new();
+            List<Area> City = new();
+            List<Area> Region = new();
+            if (resource == null)
+            {
+                return (Province, City, Region, new List<Area>());
+            }
             using var reader = new StreamReader(resource);
             var fileContent = reader.ReadToEnd();
             var areaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<FullAreaData>(fileContent);
-            List<Area> Province = new List<Area>();
-            List<Area> City = new List<Area>();
-            List<Area> Region = new List<Area>();
-
+            if (areaObj == null)
+            {
+                return (Province, City, Region, new List<Area>());
+            }
             var chiled = areaObj.children;
             foreach (var item in chiled)
             {
@@ -51,24 +60,36 @@ namespace AddressParse.Lib
         /// <returns></returns>
         public static (List<Area> Province, List<Area> City, List<Area> Region, List<Area> Street) LoadDataWithStreet()
         {
-            List<Area> Province = new List<Area>();
-            List<Area> City = new List<Area>();
-            List<Area> Region = new List<Area>();
-            List<Area> Street = new List<Area>();
-            using var resource = System.Reflection.Assembly.GetAssembly(typeof(AreaDataUtil)).GetManifestResourceStream("AddressParse.Lib.area2.json");// System.IO.File.ReadAllText("area.json");
+            var assembly = System.Reflection.Assembly.GetAssembly(typeof(AreaDataUtil));
+            var name = assembly?.GetName().Name;
+            List<List<Area>> alldata = new List<List<Area>>() { new List<Area>(), new List<Area>(), new List<Area>(), new List<Area>() };
+            using var resource = assembly?.GetManifestResourceStream($"{name}.area2.json");// System.IO.File.ReadAllText("area.json");
+            if (resource == null)
+            {
+                return (alldata[0], alldata[1], alldata[2], alldata[3]);
+            }
             using var reader = new StreamReader(resource);
             var fileContent = reader.ReadToEnd();
         
-            var areaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<JObject>(fileContent);
+            var areaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<JObject>(fileContent);         
 
-            List<List<Area>> alldata = new List<List<Area>>() { new List<Area>(), new List<Area>(), new List<Area>(), new List<Area>() };
+            if(areaObj== null)
+            {
+                return (alldata[0], alldata[1], alldata[2], alldata[3]);
+            }
 
             ParseJson(alldata, areaObj, "86", 0);
-
 
             return (alldata[0], alldata[1], alldata[2], alldata[3]);
         }
 
+        /// <summary>
+        /// 解析Json数据
+        /// </summary>
+        /// <param name="alldata"></param>
+        /// <param name="areaObj"></param>
+        /// <param name="path"></param>
+        /// <param name="level"></param>
         static void ParseJson(List<List<Area>> alldata, JObject areaObj, string path, int level)
         {
             var top = areaObj.SelectToken(path);
